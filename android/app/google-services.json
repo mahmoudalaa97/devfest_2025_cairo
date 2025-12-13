@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "675927201984",
-    "project_id": "ai-demo-devfest",
-    "storage_bucket": "ai-demo-devfest.firebasestorage.app"
+    "project_number": "258908903670",
+    "project_id": "devfest-cairo",
+    "storage_bucket": "devfest-cairo.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:675927201984:android:641ce527ceb33d231ab525",
+        "mobilesdk_app_id": "1:258908903670:android:c3b393fb7a55ec0dc134d7",
         "android_client_info": {
           "package_name": "com.mahmoudalaa.ai_demo"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAdDJDUjDNL3otiLgGN0m24jc0rHMiykZ4"
+          "current_key": "AIzaSyDcpGYI00V7pO8lm7Yp_4Dwt06mJFbjhNw"
         }
       ],
       "services": {

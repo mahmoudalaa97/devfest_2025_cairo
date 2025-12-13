@@ -22,11 +22,11 @@ class _GeneratingPlannerPageState extends State<GeneratingPlannerPage> {
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
 
-  ValueNotifier<Gender> _selectedGender = ValueNotifier(Gender.male);
-  ValueNotifier<ActivityLevel> _selectedActivityLevel = ValueNotifier(
+  final ValueNotifier<Gender> _selectedGender = ValueNotifier(Gender.male);
+  final ValueNotifier<ActivityLevel> _selectedActivityLevel = ValueNotifier(
     ActivityLevel.sedentary,
   );
-  ValueNotifier<Goal> _selectedGoal = ValueNotifier(Goal.loseWeight);
+  final ValueNotifier<Goal> _selectedGoal = ValueNotifier(Goal.loseWeight);
 
   @override
   void dispose() {

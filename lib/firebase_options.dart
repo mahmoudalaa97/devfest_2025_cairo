@@ -41,46 +41,47 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAiao-oVHppoh8b1kVx0RHC0FDtWVLLF_8',
-    appId: '1:675927201984:web:63c5ce3312fe5cab1ab525',
-    messagingSenderId: '675927201984',
-    projectId: 'ai-demo-devfest',
-    authDomain: 'ai-demo-devfest.firebaseapp.com',
-    storageBucket: 'ai-demo-devfest.firebasestorage.app',
+    apiKey: 'AIzaSyBW3L-bX3fRHzaVNtiCStylPX4rFYaJeks',
+    appId: '1:258908903670:web:cf93f5546ef7cf0cc134d7',
+    messagingSenderId: '258908903670',
+    projectId: 'devfest-cairo',
+    authDomain: 'devfest-cairo.firebaseapp.com',
+    storageBucket: 'devfest-cairo.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAdDJDUjDNL3otiLgGN0m24jc0rHMiykZ4',
-    appId: '1:675927201984:android:641ce527ceb33d231ab525',
-    messagingSenderId: '675927201984',
-    projectId: 'ai-demo-devfest',
-    storageBucket: 'ai-demo-devfest.firebasestorage.app',
+    apiKey: 'AIzaSyDcpGYI00V7pO8lm7Yp_4Dwt06mJFbjhNw',
+    appId: '1:258908903670:android:c3b393fb7a55ec0dc134d7',
+    messagingSenderId: '258908903670',
+    projectId: 'devfest-cairo',
+    storageBucket: 'devfest-cairo.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCVXUfacEvQ4PAqk76Petx77HYFJAxsXwk',
-    appId: '1:675927201984:ios:11ecac3eba56ed421ab525',
-    messagingSenderId: '675927201984',
-    projectId: 'ai-demo-devfest',
-    storageBucket: 'ai-demo-devfest.firebasestorage.app',
+    apiKey: 'AIzaSyAHv53fKb6lXQpSBSp31FdmNK740nHJoBM',
+    appId: '1:258908903670:ios:bba2fdd78b071828c134d7',
+    messagingSenderId: '258908903670',
+    projectId: 'devfest-cairo',
+    storageBucket: 'devfest-cairo.firebasestorage.app',
     iosBundleId: 'com.mahmoudalaa.aiDemo',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCVXUfacEvQ4PAqk76Petx77HYFJAxsXwk',
-    appId: '1:675927201984:ios:11ecac3eba56ed421ab525',
-    messagingSenderId: '675927201984',
-    projectId: 'ai-demo-devfest',
-    storageBucket: 'ai-demo-devfest.firebasestorage.app',
+    apiKey: 'AIzaSyAHv53fKb6lXQpSBSp31FdmNK740nHJoBM',
+    appId: '1:258908903670:ios:bba2fdd78b071828c134d7',
+    messagingSenderId: '258908903670',
+    projectId: 'devfest-cairo',
+    storageBucket: 'devfest-cairo.firebasestorage.app',
     iosBundleId: 'com.mahmoudalaa.aiDemo',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAiao-oVHppoh8b1kVx0RHC0FDtWVLLF_8',
-    appId: '1:675927201984:web:ab219286b4b8018b1ab525',
-    messagingSenderId: '675927201984',
-    projectId: 'ai-demo-devfest',
-    authDomain: 'ai-demo-devfest.firebaseapp.com',
-    storageBucket: 'ai-demo-devfest.firebasestorage.app',
+    apiKey: 'AIzaSyBW3L-bX3fRHzaVNtiCStylPX4rFYaJeks',
+    appId: '1:258908903670:web:e9de5d1ea293c675c134d7',
+    messagingSenderId: '258908903670',
+    projectId: 'devfest-cairo',
+    authDomain: 'devfest-cairo.firebaseapp.com',
+    storageBucket: 'devfest-cairo.firebasestorage.app',
   );
+
 }
