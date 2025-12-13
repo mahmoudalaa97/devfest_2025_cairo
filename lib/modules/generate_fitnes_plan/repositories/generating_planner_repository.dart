@@ -4,10 +4,10 @@ import 'package:ai_demo/model/response.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/foundation.dart';
 
-class FitnessPlannerRepository {
-  FitnessPlannerRepository();
+class GeneratingPlannerRepository {
+  GeneratingPlannerRepository();
 
-  Future<GeminiResponse?> generateFitnessPlanner(
+  Future<GeminiResponse?> generateFitnesPlanner(
     String age,
     String height,
     String weight,

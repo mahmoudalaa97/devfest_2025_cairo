@@ -123,6 +123,7 @@ Add the required packages to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.8
   firebase_core: ^4.2.1
   firebase_ai: ^3.6.0
   flutter_riverpod: ^3.0.3
@@ -174,6 +175,81 @@ flutter pub get
 flutterfire configure
 ```
 
+### Step 4: Create Required Model File
+
+The repository requires a model file that must be created manually:
+
+1. Create the directory:
+```bash
+mkdir -p lib/model
+```
+
+2. Create `lib/model/response.dart` with the following content:
+
+```dart
+class GeminiResponse {
+  final List<GeminiCandidate> candidates;
+  
+  GeminiResponse({required this.candidates});
+}
+
+class GeminiCandidate {
+  final GeminiContent content;
+  final String? finishReason;
+  
+  GeminiCandidate({
+    required this.content,
+    this.finishReason,
+  });
+}
+
+class GeminiContent {
+  final List<GeminiContentPart> parts;
+  final String role;
+  
+  GeminiContent({
+    required this.parts,
+    required this.role,
+  });
+}
+
+class GeminiContentPart {
+  final String text;
+  
+  GeminiContentPart({required this.text});
+}
+```
+
+### Step 5: Create RadioGroup Widget (if needed)
+
+If you encounter errors about `RadioGroup` not being defined, create a custom widget. You can either:
+
+1. **Create a simple wrapper** (`lib/widgets/radio_group.dart`):
+
+```dart
+import 'package:flutter/material.dart';
+
+class RadioGroup<T> extends StatelessWidget {
+  final T? groupValue;
+  final ValueChanged<T?> onChanged;
+  final Widget child;
+
+  const RadioGroup({
+    super.key,
+    required this.groupValue,
+    required this.onChanged,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+}
+```
+
+2. **Or replace RadioGroup usage** with standard Flutter `RadioListTile` widgets grouped properly.
+
 ---
 
 ## Code Walkthrough
@@ -184,41 +260,53 @@ Let's explore the codebase structure and understand how each part works.
 
 ```
 lib/
-├── main.dart                    # App entry point and UI
+├── main.dart                    # App entry point and Firebase initialization
 ├── firebase_options.dart        # Firebase configuration (auto-generated)
-├── gemini_repository.dart       # Repository for AI interactions
-├── page_controller.dart         # State management controller (duplicate, see pages/)
-└── pages/
-    ├── page_controller.dart     # State management controller (main one)
-    ├── generating_planner_state.dart  # State definitions
-    └── view_planner_page.dart   # Results display page
+└── modules/
+    └── generate_fitnes_plan/
+        ├── repositories/
+        │   └── generating_planner_repository.dart  # Repository for AI interactions
+        └── ui/
+            ├── generating_planner_page.dart        # Main form page
+            ├── generating_planner_state.dart       # State definitions
+            ├── generating_planner_controller.dart  # State management controller
+            └── view_planner_page.dart              # Results display page
 └── model/
     └── response.dart            # Model classes for Gemini responses (needs to be created)
 ```
 
-**Note:** The `model/response.dart` file is imported but may not exist. You'll need to create it with the following structure:
+**Important:** The `model/response.dart` file **must be created** as it's imported by the repository. Create `lib/model/response.dart` with the following structure:
 
 ```dart
 class GeminiResponse {
   final List<GeminiCandidate> candidates;
+  
   GeminiResponse({required this.candidates});
 }
 
 class GeminiCandidate {
   final GeminiContent content;
   final String? finishReason;
-  GeminiCandidate({required this.content, this.finishReason});
+  
+  GeminiCandidate({
+    required this.content,
+    this.finishReason,
+  });
 }
 
 class GeminiContent {
   final List<GeminiContentPart> parts;
   final String role;
-  GeminiContent({required this.parts, required this.role});
+  
+  GeminiContent({
+    required this.parts,
+    required this.role,
+  });
 }
 
 class GeminiContentPart {
   final String text;
-  GeminiContentPart({required this.text});
+    GeminiContentPart({required this.text});
 }
 ```
 
@@ -287,93 +375,113 @@ void main() async {
 
 ```dart
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ProviderScope(  // Riverpod provider scope
       child: MaterialApp(
-        home: FitnessPlannerFormPage(),  // Main form page
+        debugShowCheckedModeBanner: false,
+        title: 'Fitnes AI Agent',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blueAccent,
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
+        home: const GeneratingPlannerPage(),  // Main form page
       ),
     );
   }
 }
 ```
 
-**Form Page (`FitnessPlannerFormPage`):**
+**Form Page (`GeneratingPlannerPage`):**
 
-This widget is a `StatefulWidget` (not `ConsumerStatefulWidget`) that collects user input:
-- Age, Height, Weight (text fields)
+This widget is a `StatefulWidget` that collects user input:
+- Age, Height, Weight (text fields using `TextFormField`)
 - Gender (radio buttons using `RadioGroup<Gender>`: Male/Female)
 - Activity Level (radio buttons using `RadioGroup<ActivityLevel>`: Sedentary/Lightly Active/Moderately Active)
 - Goal (radio buttons using `RadioGroup<Goal>`: Lose Weight/Gain Muscle/Improve Health)
 
-**Note:** The `RadioGroup` widget is a custom widget used for radio button groups. If this widget doesn't exist in your codebase, you'll need to either:
-1. Implement a custom `RadioGroup` widget, or
-2. Replace it with Flutter's standard `Radio` widgets with proper grouping using `RadioListTile`
+**Important Notes:**
+
+1. **RadioGroup Widget**: The `RadioGroup` widget is used in the code but may not be defined. You'll need to either:
+   - Implement a custom `RadioGroup` widget that wraps `Radio` widgets with proper grouping
+   - Replace it with Flutter's standard `RadioListTile` widgets grouped using `Radio` with a common `groupValue`
+
+2. **Enums**: The page uses three enums defined in the same file:
+   - `Gender` (female, male)
+   - `ActivityLevel` (sedentary, lightlyActive, moderatelyActive)
+   - `Goal` (loseWeight, gainMuscle, improveHealth)
 
 **Generate Button Logic:**
 
 The button uses a `Consumer` widget to watch the state and react to changes:
 
 ```dart
-Consumer(
-  builder: (context, ref, child) {
-    // Watch the state to react to changes
-    final state = ref.watch(pageControllerProvider);
-    
-    return ElevatedButton(
-      onPressed: () async {
-        // Step 1: Prevent multiple clicks while loading
-        if (state is LoadingState) {
-          return;
-        }
-        
-        // Step 2: Call the state controller to generate planner
-        await ref.read(pageControllerProvider.notifier)
-            .generateFitnessPlanner(
-              _ageController.text,
-              _heightController.text,
-              _weightController.text,
-              _selectedGender?.name ?? "",
-              _selectedActivityLevel?.name ?? "",
-              _selectedGoal?.name ?? "",
+SizedBox(
+  height: 60,
+  child: Consumer(
+    builder: (context, ref, child) {
+      final state = ref.watch(generatingPlannerController);
+      return ElevatedButton(
+        onPressed: () async {
+          // Step 1: Prevent multiple clicks while loading
+          if (state is LoadingState) {
+            return;
+          }
+          
+          // Step 2: Call the state controller to generate planner
+          await ref.read(generatingPlannerController.notifier)
+              .generateFitnesPlanner(
+                _ageController.text,
+                _heightController.text,
+                _weightController.text,
+                _selectedGender?.name ?? "",
+                _selectedActivityLevel?.name ?? "",
+                _selectedGoal?.name ?? "",
+              );
+          
+          // Step 3: Check the state and navigate or show error
+          // Note: Since Consumer rebuilds when state changes, the 'state' variable
+          // will reflect the updated state after the async call completes
+          if (state is SuccessState && mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ViewPlannerPage(planner: state.planner),
+              ),
             );
-        
-        // Step 3: Check the state and navigate or show error
-        // Note: The 'state' variable is captured from the Consumer builder.
-        // Since Consumer rebuilds when state changes, this should reflect
-        // the updated state after the async call completes.
-        // Also check 'mounted' to ensure widget is still in tree
-        if (state is SuccessState && mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ViewPlannerPage(planner: state.planner),
-            ),
-          );
+            clearAll();
+          } else if (state is ErrorState && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error))
+            );
+          }
           clearAll();
-        } else if (state is ErrorState && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error))
-          );
-        }
-        clearAll();
-      },
-      child: state is LoadingState
-          ? const CircularProgressIndicator()
-          : const Text("Generate Planner and Diet Plan"),
-    );
-  },
+        },
+        child: state is LoadingState
+            ? const CircularProgressIndicator()
+            : const Text("Generate Planner and Diet Plan"),
+      );
+    },
+  ),
 )
 ```
 
 **Key Points:**
 - Uses `Consumer` widget to watch state changes reactively
 - Prevents multiple clicks when `LoadingState` is active
+- The `Consumer` widget automatically rebuilds when state changes, so the `state` variable will reflect the latest state
 - Checks `mounted` before navigation/snackbar to avoid errors if widget is disposed
 - Shows loading indicator when state is `LoadingState`
 - Clears form after generation attempt
 
-### 4. State Management (`lib/pages/generating_planner_state.dart`)
+**Note:** In the current implementation, the state check happens after the async call. Since `Consumer` rebuilds when the state changes, the `state` variable in the builder will be updated. However, for more reliable state handling, you could read the state again after the async call: `final updatedState = ref.read(generatingPlannerController);`
+
+### 4. State Management (`lib/modules/generate_fitnes_plan/ui/generating_planner_state.dart`)
 
 **What it does:**
 Defines the different states the app can be in during the AI generation process.
@@ -414,30 +522,32 @@ class ErrorState extends GeneratingPlannerState {
 - Prevents creating invalid states
 - Enables exhaustive pattern matching
 
-### 5. Page Controller (`lib/pages/page_controller.dart`)
+### 5. Generating Planner Controller (`lib/modules/generate_fitnes_plan/ui/generating_planner_controller.dart`)
 
 **What it does:**
 Manages the state of the fitness planner generation process using Riverpod.
-
-**Note:** There's also a `lib/page_controller.dart` file, but the one in `lib/pages/` is the one actually used (imported in `main.dart`). The controller imports `package:ai_demo/gemini_repository.dart` which should resolve to `lib/gemini_repository.dart`.
 
 **Code Breakdown:**
 
 ```dart
 // Riverpod provider that creates and manages the controller
-final pageControllerProvider =
-    StateNotifierProvider<PageController, GeneratingPlannerState>((Ref ref) {
-      return PageController(FitnessPlannerRepository());
+final generatingPlannerController =
+    StateNotifierProvider<GeneratingPlannerController, GeneratingPlannerState>((
+      Ref ref,
+    ) {
+      return GeneratingPlannerController(GeneratingPlannerRepository());
     });
 
-class PageController extends StateNotifier<GeneratingPlannerState> {
-  final FitnessPlannerRepository fitnessPlannerRepository;
+class GeneratingPlannerController
+    extends StateNotifier<GeneratingPlannerState> {
+  final GeneratingPlannerRepository generatingPlannerRepository;
   
   // Initialize with InitialState
-  PageController(this.fitnessPlannerRepository) : super(InitialState());
+  GeneratingPlannerController(this.generatingPlannerRepository)
+      : super(InitialState());
   
   // Main method to generate fitness planner
-  Future<void> generateFitnessPlanner(
+  Future<void> generateFitnesPlanner(
     String age, String height, String weight,
     String gender, String activityLevel, String goal,
   ) async {
@@ -445,7 +555,7 @@ class PageController extends StateNotifier<GeneratingPlannerState> {
     state = LoadingState();
     
     // Step 2: Call repository to generate plan
-    final response = await fitnessPlannerRepository.generateFitnessPlanner(
+    final response = await generatingPlannerRepository.generateFitnesPlanner(
       age, height, weight, gender, activityLevel, goal,
     );
     
@@ -468,18 +578,20 @@ class PageController extends StateNotifier<GeneratingPlannerState> {
 2. `LoadingState` → User clicks "Generate" button
 3. `SuccessState` or `ErrorState` → AI responds
 
-### 6. Gemini Repository (`lib/gemini_repository.dart`)
+### 6. Generating Planner Repository (`lib/modules/generate_fitnes_plan/repositories/generating_planner_repository.dart`)
 
 **What it does:**
 Handles all interactions with Firebase AI (Gemini). This is where the magic happens!
 
-**Important:** This file imports `package:ai_demo/model/response.dart` which defines the `GeminiResponse`, `GeminiCandidate`, `GeminiContent`, and `GeminiContentPart` classes. You'll need to create this model file if it doesn't exist.
+**Important:** This file imports `package:ai_demo/model/response.dart` which defines the `GeminiResponse`, `GeminiCandidate`, `GeminiContent`, and `GeminiContentPart` classes. **You need to create this model file** - see the model structure below.
 
 **Code Breakdown:**
 
 ```dart
-class FitnessPlannerRepository {
-  Future<GeminiResponse?> generateFitnessPlanner(
+class GeneratingPlannerRepository {
+  GeneratingPlannerRepository();
+
+  Future<GeminiResponse?> generateFitnesPlanner(
     String age, String height, String weight,
     String gender, String activityLevel, String goal,
   ) async {
@@ -505,20 +617,20 @@ class FitnessPlannerRepository {
 ```dart
       // Step 2: Build the prompt with user data
       String promptCustom = """
-        You are a fitness planner.
-        You are given the following information:
-        - Age: $age
-        - Height: $height
-        - Weight: $weight
-        - Gender: $gender
-        - Activity Level: $activityLevel
-        - Goal: $goal
+          You are a fitness planner.
+          You are given the following information:
+          - Age: $age
+          - Height: $height
+          - Weight: $weight
+          - Gender: $gender
+          - Activity Level: $activityLevel
+          - Goal: $goal
 
-        check if the age or height or weight is not a number, if so, return an error message.
-        You are to generate a fitness plan and diet plan for the user.
-        The fitness plan should be in a markdown format.
-        The diet plan should be in a markdown format.
-      """;
+          check if the age or height or weight is not a number, if so, return an error message.
+          You are to generate a fitness plan and diet plan for the user.
+          The fitness plan should be in a markdown format.
+          The diet plan should be in a markdown format.
+          """;
 ```
 
 **Generating Content:**
@@ -578,7 +690,7 @@ class FitnessPlannerRepository {
 - The response contains the generated text in `response.text`
 - Always handle errors (network issues, API errors, etc.)
 
-### 7. View Planner Page (`lib/pages/view_planner_page.dart`)
+### 7. View Planner Page (`lib/modules/generate_fitnes_plan/ui/view_planner_page.dart`)
 
 **What it does:**
 Displays the generated fitness plan in a beautiful markdown format.
@@ -587,6 +699,7 @@ Displays the generated fitness plan in a beautiful markdown format.
 
 ```dart
 class ViewPlannerPage extends StatelessWidget {
+  const ViewPlannerPage({super.key, required this.planner});
   final String planner;  // Markdown text from AI
   
   @override
@@ -606,7 +719,38 @@ class ViewPlannerPage extends StatelessWidget {
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
-              // ... more styles
+              h2: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              h3: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+              code: TextStyle(
+                color: Colors.white,
+                backgroundColor: Colors.black.withValues(alpha: 0.3),
+                fontFamily: 'monospace',
+              ),
+              codeblockDecoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              blockquote: TextStyle(
+                color: Colors.white70,
+                fontStyle: FontStyle.italic,
+              ),
+              listBullet: const TextStyle(color: Colors.white),
+              strong: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+              em: const TextStyle(
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ),
         ),
@@ -631,9 +775,12 @@ class ViewPlannerPage extends StatelessWidget {
 flutter pub get
 ```
 
-### Step 2: Verify Firebase Configuration
+### Step 2: Verify Required Files Exist
 
-Make sure `lib/firebase_options.dart` exists and contains your Firebase project configuration.
+Make sure the following files exist:
+- ✅ `lib/firebase_options.dart` - Firebase configuration (auto-generated)
+- ✅ `lib/model/response.dart` - Model classes (must be created manually)
+- ✅ `lib/widgets/radio_group.dart` - RadioGroup widget (if using custom implementation)
 
 ### Step 3: Run the App
 
@@ -691,8 +838,9 @@ flutter run -d chrome
 ### Issue: "Model not found"
 
 **Solution:**
-- Verify the model name in `gemini_repository.dart` is correct
+- Verify the model name in `generating_planner_repository.dart` is correct
 - Check [Gemini API documentation](https://ai.google.dev/models/gemini) for available models
+
 
 
 ## Next Steps

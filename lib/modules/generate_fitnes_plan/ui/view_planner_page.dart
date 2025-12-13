@@ -33,11 +33,11 @@ class ViewPlannerPage extends StatelessWidget {
               ),
               code: TextStyle(
                 color: Colors.white,
-                backgroundColor: Colors.black.withOpacity(0.3),
+                backgroundColor: Colors.black.withValues(alpha: 0.3),
                 fontFamily: 'monospace',
               ),
               codeblockDecoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(4),
               ),
               blockquote: TextStyle(
