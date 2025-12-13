@@ -1,30 +1,57 @@
+import 'dart:io';
+
 import 'package:ai_demo/model/response.dart';
 import 'package:ai_demo/network_provider.dart';
 import 'package:ai_demo/utlities/api_constants.dart';
+import 'package:firebase_ai/firebase_ai.dart';
+import 'package:flutter/foundation.dart';
 
 class GeminiRepository {
   final NetworkProvider networkProvider;
 
   GeminiRepository(this.networkProvider);
 
-  Future<GeminiResponse?> generateStreamText(String prompt) async {
+  Future<GeminiResponse?> generateContent(String prompt) async {
     try {
-      final response = await networkProvider.post(
-        ApiConstants.generateContent,
-        {
-          "contents": [
-            {
-              "parts": [
-                {"text": prompt},
-              ],
-            },
-          ],
-        },
+      final model = FirebaseAI.googleAI().generativeModel(
+        model: 'gemini-2.5-flash',
+        systemInstruction: Content("System", [TextPart("Your name is jood")]),
       );
-      return GeminiResponse.fromJson(response.data);
-    } on Exception catch (e) {
-      print(e);
-      return null;
+
+      String promptCustom =
+          "Instraction for this model your name is jood and this is the user prompt message:$prompt";
+
+      final response = await model.generateContent([
+        Content.text(promptCustom),
+      ]);
+      return GeminiResponse(
+        candidates: [
+          GeminiCandidate(
+            content: GeminiContent(
+              parts: [GeminiContentPart(text: response.text ?? "")],
+              role: 'model',
+            ),
+            finishReason: response.candidates.first.finishReason?.name,
+          ),
+        ],
+      );
+    } on SocketException catch (e) {
+      debugPrint(e.toString());
+      return GeminiResponse(
+        candidates: [
+          GeminiCandidate(
+            content: GeminiContent(
+              parts: [
+                GeminiContentPart(
+                  text: 'Ops: Check your network connection!!!',
+                ),
+              ],
+              role: 'model',
+            ),
+            finishReason: 'error',
+          ),
+        ],
+      );
     }
   }
 
@@ -36,7 +63,7 @@ class GeminiRepository {
       );
       return GeminiResponse.fromJson(response.data);
     } on Exception catch (e) {
-      print(e);
+      debugPrint(e.toString());
       return null;
     }
   }

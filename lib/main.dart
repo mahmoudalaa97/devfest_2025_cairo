@@ -1,11 +1,14 @@
+import 'package:ai_demo/firebase_options.dart';
 import 'package:ai_demo/page_controller.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
 }
@@ -33,7 +36,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ChatScreen extends ConsumerStatefulWidget {
-  ChatScreen({super.key});
+  const ChatScreen({super.key});
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -132,11 +135,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           ),
                           code: TextStyle(
                             color: Colors.white,
-                            backgroundColor: Colors.black.withOpacity(0.3),
+                            backgroundColor: Colors.black.withValues(
+                              alpha: 0.3,
+                            ),
                             fontFamily: 'monospace',
                           ),
                           codeblockDecoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           blockquote: TextStyle(

@@ -34,12 +34,7 @@ class PageController extends StateNotifier<List<GeminiResponse>> {
       ],
     ];
 
-    final response = await geminiRepository.interractiveChat([
-      GeminiContent(
-        parts: [GeminiContentPart(text: prompt)],
-        role: 'user',
-      ),
-    ]);
+    final response = await geminiRepository.generateContent(prompt);
     if (response != null) {
       state = [...state, response];
     }
