@@ -1,25 +1,44 @@
 import 'dart:io';
 
 import 'package:ai_demo/model/response.dart';
-import 'package:ai_demo/network_provider.dart';
-import 'package:ai_demo/utlities/api_constants.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/foundation.dart';
 
-class GeminiRepository {
-  final NetworkProvider networkProvider;
+class FitnessPlannerRepository {
+  FitnessPlannerRepository();
 
-  GeminiRepository(this.networkProvider);
-
-  Future<GeminiResponse?> generateContent(String prompt) async {
+  Future<GeminiResponse?> generateFitnessPlanner(
+    String age,
+    String height,
+    String weight,
+    String gender,
+    String activityLevel,
+    String goal,
+  ) async {
     try {
       final model = FirebaseAI.googleAI().generativeModel(
         model: 'gemini-2.5-flash',
-        systemInstruction: Content("System", [TextPart("Your name is jood")]),
+        systemInstruction: Content("System", [
+          TextPart("Your name is Big Ramy and you are a fitness expert"),
+        ]),
       );
 
       String promptCustom =
-          "Instraction for this model your name is jood and this is the user prompt message:$prompt";
+          """
+          You are a fitness planner.
+          You are given the following information:
+          - Age: $age
+          - Height: $height
+          - Weight: $weight
+          - Gender: $gender
+          - Activity Level: $activityLevel
+          - Goal: $goal
+
+          check if the age or height or weight is not a number, if so, return an error message.
+          You are to generate a fitness plan and diet plan for the user.
+          The fitness plan should be in a markdown format.
+          The diet plan should be in a markdown format.
+          """;
 
       final response = await model.generateContent([
         Content.text(promptCustom),
@@ -52,19 +71,6 @@ class GeminiRepository {
           ),
         ],
       );
-    }
-  }
-
-  Future<GeminiResponse?> interractiveChat(List<GeminiContent> parts) async {
-    try {
-      final response = await networkProvider.post(
-        ApiConstants.interractiveChat,
-        {"contents": parts.map((e) => e.toJson()).toList()},
-      );
-      return GeminiResponse.fromJson(response.data);
-    } on Exception catch (e) {
-      debugPrint(e.toString());
-      return null;
     }
   }
 }

@@ -10,8 +10,8 @@ final pageControllerProvider =
     });
 
 class PageController extends StateNotifier<GeneratingPlannerState> {
-  PageController(this.geminiRepository) : super(InitialState());
-  final FitnessPlannerRepository geminiRepository;
+  PageController(this.fitnessPlannerRepository) : super(InitialState());
+  final FitnessPlannerRepository fitnessPlannerRepository;
 
   Future<void> generateFitnessPlanner(
     String age,
@@ -22,7 +22,7 @@ class PageController extends StateNotifier<GeneratingPlannerState> {
     String goal,
   ) async {
     state = LoadingState();
-    final response = await geminiRepository.generateFitnessPlanner(
+    final response = await fitnessPlannerRepository.generateFitnessPlanner(
       age,
       height,
       weight,
