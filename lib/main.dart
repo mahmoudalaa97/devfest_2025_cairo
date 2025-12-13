@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
     return ProviderScope(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Fitness AI Agent',
+        title: 'Fitnes AI Agent',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.blueAccent,
@@ -41,16 +41,14 @@ enum ActivityLevel { sedentary, lightlyActive, moderatelyActive }
 
 enum Goal { loseWeight, gainMuscle, improveHealth }
 
-class FitnessPlannerFormPage extends ConsumerStatefulWidget {
+class FitnessPlannerFormPage extends StatefulWidget {
   const FitnessPlannerFormPage({super.key});
 
   @override
-  ConsumerState<FitnessPlannerFormPage> createState() =>
-      _FitnessPlannerFormPageState();
+  State<FitnessPlannerFormPage> createState() => _FitnessPlannerFormPageState();
 }
 
-class _FitnessPlannerFormPageState
-    extends ConsumerState<FitnessPlannerFormPage> {
+class _FitnessPlannerFormPageState extends State<FitnessPlannerFormPage> {
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
@@ -79,9 +77,8 @@ class _FitnessPlannerFormPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(pageControllerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text("Fitness AI Agent")),
+      appBar: AppBar(title: const Text("Fitnes AI Agent")),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -208,37 +205,45 @@ class _FitnessPlannerFormPageState
               const SizedBox(height: 20),
               SizedBox(
                 height: 60,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await ref
-                        .read(pageControllerProvider.notifier)
-                        .generateFitnessPlanner(
-                          _ageController.text,
-                          _heightController.text,
-                          _weightController.text,
-                          _selectedGender?.name ?? "",
-                          _selectedActivityLevel?.name ?? "",
-                          _selectedGoal?.name ?? "",
-                        );
-                    if (state is SuccessState) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ViewPlannerPage(planner: state.planner),
-                        ),
-                      );
-                      clearAll();
-                    } else if (state is ErrorState) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(state.error)));
-                    }
-                    clearAll();
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final state = ref.watch(pageControllerProvider);
+                    return ElevatedButton(
+                      onPressed: () async {
+                        if (state is LoadingState) {
+                          return;
+                        }
+                        await ref
+                            .read(pageControllerProvider.notifier)
+                            .generateFitnessPlanner(
+                              _ageController.text,
+                              _heightController.text,
+                              _weightController.text,
+                              _selectedGender?.name ?? "",
+                              _selectedActivityLevel?.name ?? "",
+                              _selectedGoal?.name ?? "",
+                            );
+                        if (state is SuccessState && mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ViewPlannerPage(planner: state.planner),
+                            ),
+                          );
+                          clearAll();
+                        } else if (state is ErrorState && mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(state.error)));
+                        }
+                        clearAll();
+                      },
+                      child: state is LoadingState
+                          ? const CircularProgressIndicator()
+                          : const Text("Generate Planner and Diet Plan"),
+                    );
                   },
-                  child: state is LoadingState
-                      ? const CircularProgressIndicator()
-                      : const Text("Generate Planner and Diet Plan"),
                 ),
               ),
             ],
