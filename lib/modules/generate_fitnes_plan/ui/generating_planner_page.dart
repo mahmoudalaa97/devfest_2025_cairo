@@ -22,16 +22,17 @@ class _GeneratingPlannerPageState extends State<GeneratingPlannerPage> {
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
 
-  Gender? _selectedGender = Gender.male;
-  ActivityLevel? _selectedActivityLevel = ActivityLevel.sedentary;
-  Goal? _selectedGoal = Goal.loseWeight;
+  ValueNotifier<Gender> _selectedGender = ValueNotifier(Gender.male);
+  ValueNotifier<ActivityLevel> _selectedActivityLevel = ValueNotifier(
+    ActivityLevel.sedentary,
+  );
+  ValueNotifier<Goal> _selectedGoal = ValueNotifier(Goal.loseWeight);
 
   @override
   void dispose() {
     _ageController.dispose();
     _heightController.dispose();
     _weightController.dispose();
-
     super.dispose();
   }
 
@@ -39,9 +40,9 @@ class _GeneratingPlannerPageState extends State<GeneratingPlannerPage> {
     _ageController.clear();
     _heightController.clear();
     _weightController.clear();
-    _selectedGender = Gender.male;
-    _selectedActivityLevel = ActivityLevel.sedentary;
-    _selectedGoal = Goal.loseWeight;
+    _selectedGender.value = Gender.male;
+    _selectedActivityLevel.value = ActivityLevel.sedentary;
+    _selectedGoal.value = Goal.loseWeight;
   }
 
   @override
@@ -84,88 +85,109 @@ class _GeneratingPlannerPageState extends State<GeneratingPlannerPage> {
                   // Gender selection widget
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: RadioGroup<Gender>(
-                      groupValue: _selectedGender,
-                      onChanged: (Gender? value) {
-                        _selectedGender = value;
+                    child: ValueListenableBuilder(
+                      valueListenable: _selectedGender,
+                      builder: (context, value, child) {
+                        return RadioGroup<Gender>(
+                          groupValue: value,
+                          onChanged: (Gender? gender) {
+                            if (gender != null) {
+                              _selectedGender.value = gender;
+                            }
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text('Select your gender: '),
+                              const ListTile(
+                                title: Text('Male'),
+                                leading: Radio<Gender>(value: Gender.male),
+                              ),
+                              const ListTile(
+                                title: Text('Female'),
+                                leading: Radio<Gender>(value: Gender.female),
+                              ),
+                            ],
+                          ),
+                        );
                       },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text('Select your gender: '),
-                          const ListTile(
-                            title: Text('Male'),
-                            leading: Radio<Gender>(value: Gender.male),
-                          ),
-                          const ListTile(
-                            title: Text('Female'),
-                            leading: Radio<Gender>(value: Gender.female),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   // Activity level selection widget
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: RadioGroup<ActivityLevel>(
-                      groupValue: _selectedActivityLevel,
-                      onChanged: (ActivityLevel? value) {
-                        _selectedActivityLevel = value;
+                    child: ValueListenableBuilder(
+                      valueListenable: _selectedActivityLevel,
+                      builder: (context, value, child) {
+                        return RadioGroup<ActivityLevel>(
+                          groupValue: value,
+                          onChanged: (ActivityLevel? activityLevel) {
+                            if (activityLevel != null) {
+                              _selectedActivityLevel.value = activityLevel;
+                            }
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text('Select your activity level: '),
+                              const ListTile(
+                                title: Text('Sedentary'),
+                                leading: Radio<ActivityLevel>(
+                                  value: ActivityLevel.sedentary,
+                                ),
+                              ),
+                              const ListTile(
+                                title: Text('Lightly active'),
+                                leading: Radio<ActivityLevel>(
+                                  value: ActivityLevel.lightlyActive,
+                                ),
+                              ),
+                              const ListTile(
+                                title: Text('Moderately active'),
+                                leading: Radio<ActivityLevel>(
+                                  value: ActivityLevel.moderatelyActive,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text('Select your activity level: '),
-                          const ListTile(
-                            title: Text('Sedentary'),
-                            leading: Radio<ActivityLevel>(
-                              value: ActivityLevel.sedentary,
-                            ),
-                          ),
-                          const ListTile(
-                            title: Text('Lightly active'),
-                            leading: Radio<ActivityLevel>(
-                              value: ActivityLevel.lightlyActive,
-                            ),
-                          ),
-                          const ListTile(
-                            title: Text('Moderately active'),
-                            leading: Radio<ActivityLevel>(
-                              value: ActivityLevel.moderatelyActive,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                   // Goal selection widget
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: RadioGroup<Goal>(
-                      groupValue: _selectedGoal,
-                      onChanged: (Goal? value) {
-                        _selectedGoal = value;
+                    child: ValueListenableBuilder(
+                      valueListenable: _selectedGoal,
+                      builder: (context, value, child) {
+                        return RadioGroup<Goal>(
+                          groupValue: _selectedGoal.value,
+                          onChanged: (Goal? goal) {
+                            if (goal != null) {
+                              _selectedGoal.value = goal;
+                            }
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text('Select your goal: '),
+                              const ListTile(
+                                title: Text('Lose weight'),
+                                leading: Radio<Goal>(value: Goal.loseWeight),
+                              ),
+                              const ListTile(
+                                title: Text('Gain muscle'),
+                                leading: Radio<Goal>(value: Goal.gainMuscle),
+                              ),
+                              const ListTile(
+                                title: Text('Improve health'),
+                                leading: Radio<Goal>(value: Goal.improveHealth),
+                              ),
+                            ],
+                          ),
+                        );
                       },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text('Select your goal: '),
-                          const ListTile(
-                            title: Text('Lose weight'),
-                            leading: Radio<Goal>(value: Goal.loseWeight),
-                          ),
-                          const ListTile(
-                            title: Text('Gain muscle'),
-                            leading: Radio<Goal>(value: Goal.gainMuscle),
-                          ),
-                          const ListTile(
-                            title: Text('Improve health'),
-                            leading: Radio<Goal>(value: Goal.improveHealth),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ],
@@ -188,9 +210,9 @@ class _GeneratingPlannerPageState extends State<GeneratingPlannerPage> {
                               _ageController.text,
                               _heightController.text,
                               _weightController.text,
-                              _selectedGender?.name ?? "",
-                              _selectedActivityLevel?.name ?? "",
-                              _selectedGoal?.name ?? "",
+                              _selectedGender.value.name,
+                              _selectedActivityLevel.value.name,
+                              _selectedGoal.value.name,
                             );
                         if (state is SuccessState && mounted) {
                           Navigator.push(
