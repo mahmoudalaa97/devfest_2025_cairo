@@ -1,13 +1,12 @@
 import 'dart:io';
 
-import 'package:ai_demo/model/response.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/foundation.dart';
 
 class GeneratingPlannerRepository {
   GeneratingPlannerRepository();
 
-  Future<GeminiResponse?> generateFitnesPlanner(
+  Future<String?> generateFitnesPlanner(
     String age,
     String height,
     String weight,
@@ -40,37 +39,13 @@ class GeneratingPlannerRepository {
           The diet plan should be in a markdown format.
           """;
 
-      final response = await model.generateContent([
+      final GenerateContentResponse response = await model.generateContent([
         Content.text(promptCustom),
       ]);
-      return GeminiResponse(
-        candidates: [
-          GeminiCandidate(
-            content: GeminiContent(
-              parts: [GeminiContentPart(text: response.text ?? "")],
-              role: 'model',
-            ),
-            finishReason: response.candidates.first.finishReason?.name,
-          ),
-        ],
-      );
+      return response.text;
     } on SocketException catch (e) {
       debugPrint(e.toString());
-      return GeminiResponse(
-        candidates: [
-          GeminiCandidate(
-            content: GeminiContent(
-              parts: [
-                GeminiContentPart(
-                  text: 'Ops: Check your network connection!!!',
-                ),
-              ],
-              role: 'model',
-            ),
-            finishReason: 'error',
-          ),
-        ],
-      );
+      return 'Ops: Check your network connection!!!';
     }
   }
 }

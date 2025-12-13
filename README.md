@@ -175,52 +175,7 @@ flutter pub get
 flutterfire configure
 ```
 
-### Step 4: Create Required Model File
-
-The repository requires a model file that must be created manually:
-
-1. Create the directory:
-```bash
-mkdir -p lib/model
-```
-
-2. Create `lib/model/response.dart` with the following content:
-
-```dart
-class GeminiResponse {
-  final List<GeminiCandidate> candidates;
-  
-  GeminiResponse({required this.candidates});
-}
-
-class GeminiCandidate {
-  final GeminiContent content;
-  final String? finishReason;
-  
-  GeminiCandidate({
-    required this.content,
-    this.finishReason,
-  });
-}
-
-class GeminiContent {
-  final List<GeminiContentPart> parts;
-  final String role;
-  
-  GeminiContent({
-    required this.parts,
-    required this.role,
-  });
-}
-
-class GeminiContentPart {
-  final String text;
-  
-  GeminiContentPart({required this.text});
-}
-```
-
-### Step 5: Create RadioGroup Widget (if needed)
+### Step 4: Create RadioGroup Widget (if needed)
 
 If you encounter errors about `RadioGroup` not being defined, create a custom widget. You can either:
 
@@ -271,43 +226,6 @@ lib/
             ├── generating_planner_state.dart       # State definitions
             ├── generating_planner_controller.dart  # State management controller
             └── view_planner_page.dart              # Results display page
-└── model/
-    └── response.dart            # Model classes for Gemini responses (needs to be created)
-```
-
-**Important:** The `model/response.dart` file **must be created** as it's imported by the repository. Create `lib/model/response.dart` with the following structure:
-
-```dart
-class GeminiResponse {
-  final List<GeminiCandidate> candidates;
-  
-  GeminiResponse({required this.candidates});
-}
-
-class GeminiCandidate {
-  final GeminiContent content;
-  final String? finishReason;
-  
-  GeminiCandidate({
-    required this.content,
-    this.finishReason,
-  });
-}
-
-class GeminiContent {
-  final List<GeminiContentPart> parts;
-  final String role;
-  
-  GeminiContent({
-    required this.parts,
-    required this.role,
-  });
-}
-
-class GeminiContentPart {
-  final String text;
-    GeminiContentPart({required this.text});
-}
 ```
 
 ### 2. Firebase Options (`lib/firebase_options.dart`)
@@ -561,10 +479,8 @@ class GeneratingPlannerController
     
     // Step 3: Handle response
     if (response != null) {
-      // Success - extract text from response
-      state = SuccessState(
-        planner: response.candidates.first.content.parts.first.text,
-      );
+      // Success - response is already a String
+      state = SuccessState(planner: response);
     } else {
       // Failure - set error state
       state = ErrorState(error: "Failed to generate fitness planner");
@@ -583,15 +499,13 @@ class GeneratingPlannerController
 **What it does:**
 Handles all interactions with Firebase AI (Gemini). This is where the magic happens!
 
-**Important:** This file imports `package:ai_demo/model/response.dart` which defines the `GeminiResponse`, `GeminiCandidate`, `GeminiContent`, and `GeminiContentPart` classes. **You need to create this model file** - see the model structure below.
-
 **Code Breakdown:**
 
 ```dart
 class GeneratingPlannerRepository {
   GeneratingPlannerRepository();
 
-  Future<GeminiResponse?> generateFitnesPlanner(
+  Future<String?> generateFitnesPlanner(
     String age, String height, String weight,
     String gender, String activityLevel, String goal,
   ) async {
@@ -633,30 +547,14 @@ class GeneratingPlannerRepository {
           """;
 ```
 
-**Generating Content:**
+**Generating Content and Response Handling:**
 
 ```dart
-      // Step 3: Generate content from the model
-      final response = await model.generateContent([
+      // Step 3: Generate content from the model and return the text directly
+      final GenerateContentResponse response = await model.generateContent([
         Content.text(promptCustom),
       ]);
-```
-
-**Response Handling:**
-
-```dart
-      // Step 4: Convert Firebase AI response to our model
-      return GeminiResponse(
-        candidates: [
-          GeminiCandidate(
-            content: GeminiContent(
-              parts: [GeminiContentPart(text: response.text ?? "")],
-              role: 'model',
-            ),
-            finishReason: response.candidates.first.finishReason?.name,
-          ),
-        ],
-      );
+      return response.text;  // Returns String? directly
 ```
 
 **Error Handling:**
@@ -665,21 +563,7 @@ class GeneratingPlannerRepository {
     } on SocketException catch (e) {
       // Handle network errors
       debugPrint(e.toString());
-      return GeminiResponse(
-        candidates: [
-          GeminiCandidate(
-            content: GeminiContent(
-              parts: [
-                GeminiContentPart(
-                  text: 'Ops: Check your network connection!!!',
-                ),
-              ],
-              role: 'model',
-            ),
-            finishReason: 'error',
-          ),
-        ],
-      );
+      return 'Ops: Check your network connection!!!';
     }
   }
 }
@@ -688,6 +572,7 @@ class GeneratingPlannerRepository {
 **Important Points:**
 - `generateContent()` is async - it makes a network call to Gemini API
 - The response contains the generated text in `response.text`
+- The repository returns `String?` directly (simplified from previous model structure)
 - Always handle errors (network issues, API errors, etc.)
 
 ### 7. View Planner Page (`lib/modules/generate_fitnes_plan/ui/view_planner_page.dart`)
@@ -779,7 +664,6 @@ flutter pub get
 
 Make sure the following files exist:
 - ✅ `lib/firebase_options.dart` - Firebase configuration (auto-generated)
-- ✅ `lib/model/response.dart` - Model classes (must be created manually)
 - ✅ `lib/widgets/radio_group.dart` - RadioGroup widget (if using custom implementation)
 
 ### Step 3: Run the App

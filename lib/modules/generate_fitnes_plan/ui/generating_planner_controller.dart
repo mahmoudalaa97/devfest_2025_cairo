@@ -37,7 +37,7 @@ class GeneratingPlannerController
 
     if (response != null) {
       state = SuccessState(
-        planner: response.candidates.first.content.parts.first.text,
+        planner: response,
       );
     } else {
       state = ErrorState(error: "Failed to generate fitness planner");
