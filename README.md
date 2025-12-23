@@ -160,7 +160,8 @@ void main() async {
 ### Step 1: Clone or Navigate to Project
 
 ```bash
-cd ai_demo
+git clone https://github.com/mahmoudalaa97/devfest_2025_cairo.git
+cd devfest_2025_cairo
 ```
 
 ### Step 2: Install Dependencies
@@ -178,32 +179,6 @@ flutterfire configure
 ### Step 4: Create RadioGroup Widget (if needed)
 
 If you encounter errors about `RadioGroup` not being defined, create a custom widget. You can either:
-
-1. **Create a simple wrapper** (`lib/widgets/radio_group.dart`):
-
-```dart
-import 'package:flutter/material.dart';
-
-class RadioGroup<T> extends StatelessWidget {
-  final T? groupValue;
-  final ValueChanged<T?> onChanged;
-  final Widget child;
-
-  const RadioGroup({
-    super.key,
-    required this.groupValue,
-    required this.onChanged,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return child;
-  }
-}
-```
-
-2. **Or replace RadioGroup usage** with standard Flutter `RadioListTile` widgets grouped properly.
 
 ---
 
@@ -664,7 +639,6 @@ flutter pub get
 
 Make sure the following files exist:
 - ✅ `lib/firebase_options.dart` - Firebase configuration (auto-generated)
-- ✅ `lib/widgets/radio_group.dart` - RadioGroup widget (if using custom implementation)
 
 ### Step 3: Run the App
 
